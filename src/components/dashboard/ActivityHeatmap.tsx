@@ -18,11 +18,11 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
   title = "Activity",
 }) => {
   const getIntensityClass = (count: number) => {
-    if (count <= 0) return "bg-transparent border border-slate-200";
-    if (count === 1) return "bg-green-100 border border-green-100";
-    if (count === 2) return "bg-green-200 border border-green-200";
-    if (count === 3) return "bg-green-400 border border-green-400";
-    return "bg-green-600 border border-green-600";
+    if (count <= 0) return "bg-transparent border border-border";
+    if (count === 1) return "bg-success/20 border border-success/20";
+    if (count === 2) return "bg-success/40 border border-success/40";
+    if (count === 3) return "bg-success/60 border border-success/60";
+    return "bg-success border border-success";
   };
 
   const formatDate = (dateStr: number | string) => {

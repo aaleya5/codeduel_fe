@@ -59,14 +59,9 @@ const Index: React.FC = () => {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse-slow" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-slow" />
-        </div>
-        
         <div className="container py-24 md:py-32">
           <div className="mx-auto max-w-3xl text-center space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-4 py-1.5 text-sm backdrop-blur">
+            <div className="inline-flex items-center gap-2 border border-border bg-background px-4 py-1.5 text-sm">
               <Zap className="h-4 w-4 text-primary" />
               <span>Track. Compete. Improve.</span>
             </div>
@@ -122,9 +117,9 @@ const Index: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <Card key={index} className="hover-lift border-2 group">
+            <Card key={index} className="border-2">
               <CardContent className="p-6 space-y-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <div className="flex h-12 w-12 items-center justify-center bg-primary/10 text-primary">
                   <feature.icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold">{feature.title}</h3>

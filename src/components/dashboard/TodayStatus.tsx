@@ -35,7 +35,7 @@ const TodayStatus: React.FC<TodayStatusProps> = ({ stats, onComplete }) => {
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#7c3aed', '#10b981', '#3b82f6', '#f59e0b']
+      colors: ['#e3a2ae', '#9bc9bf', '#9fc5d3', '#e6c58f']
     });
     onComplete?.();
   };

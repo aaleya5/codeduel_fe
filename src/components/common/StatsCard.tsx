@@ -16,18 +16,18 @@ interface StatsCardProps {
 
 const variantStyles = {
   default: 'bg-card',
-  success: 'bg-success/10 border-success/20',
-  warning: 'bg-warning/10 border-warning/20',
-  destructive: 'bg-destructive/10 border-destructive/20',
-  primary: 'bg-primary/10 border-primary/20'
+  success: 'bg-success/20 border-success/40',
+  warning: 'bg-warning/20 border-warning/40',
+  destructive: 'bg-destructive/20 border-destructive/40',
+  primary: 'bg-secondary border-border'
 };
 
 const iconVariantStyles = {
   default: 'bg-muted text-muted-foreground',
-  success: 'bg-success/20 text-success',
-  warning: 'bg-warning/20 text-warning',
-  destructive: 'bg-destructive/20 text-destructive',
-  primary: 'bg-primary/20 text-primary'
+  success: 'bg-success/30 text-success',
+  warning: 'bg-warning/30 text-warning',
+  destructive: 'bg-destructive/30 text-destructive',
+  primary: 'bg-muted text-foreground'
 };
 
 const StatsCard: React.FC<StatsCardProps> = ({

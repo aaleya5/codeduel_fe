@@ -215,10 +215,10 @@ const Settings: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {sessionStatus && sessionStatus.isValid ? (
-                  <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-4">
+                  <div className="rounded-lg bg-success/10 border border-success/20 p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-green-600 dark:text-green-400">
+                        <p className="font-medium text-success">
                           Session Active
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
@@ -239,8 +239,8 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-4">
-                    <p className="font-medium text-yellow-600 dark:text-yellow-400">
+                  <div className="rounded-lg bg-warning/10 border border-warning/20 p-4">
+                    <p className="font-medium text-warning">
                       No Active Session
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -320,8 +320,8 @@ const Settings: React.FC = () => {
                   </Button>
                 </div>
 
-                <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 mt-4">
-                  <p className="font-medium text-blue-600 dark:text-blue-400 text-sm">
+                <div className="rounded-lg bg-accent border border-accent p-4 mt-4">
+                  <p className="font-medium text-accent-foreground text-sm">
                     How to get your LeetCode session:
                   </p>
                   <ol className="text-xs text-muted-foreground mt-2 space-y-1 list-decimal list-inside">

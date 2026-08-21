@@ -37,7 +37,7 @@ const Leaderboard: React.FC = () => {
         <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto">
           {/* 2nd Place */}
           <div className="order-1 pt-8">
-            <Card className="hover-lift text-center p-4 bg-gradient-to-b from-gray-400/10 to-gray-400/5 border-gray-400/20">
+            <Card className="text-center p-4 bg-muted border-border">
               <div className="relative mb-3">
                 <Avatar className="h-16 w-16 mx-auto border-4 border-gray-400">
                   <AvatarImage src={topThree[1]?.avatar} />
@@ -55,13 +55,13 @@ const Leaderboard: React.FC = () => {
 
           {/* 1st Place */}
           <div className="order-2">
-            <Card className="hover-lift text-center p-4 bg-gradient-to-b from-yellow-500/10 to-yellow-500/5 border-yellow-500/20 shadow-glow">
+            <Card className="text-center p-4 bg-warning/10 border-warning/20">
               <div className="relative mb-3">
-                <Avatar className="h-20 w-20 mx-auto border-4 border-yellow-500">
+                <Avatar className="h-20 w-20 mx-auto border-4 border-warning">
                   <AvatarImage src={topThree[0]?.avatar} />
                   <AvatarFallback>{topThree[0]?.userName.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-yellow-500 rounded-full p-1">
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-warning rounded-full p-1">
                   <Trophy className="h-4 w-4 text-primary-foreground" />
                 </div>
               </div>
@@ -73,7 +73,7 @@ const Leaderboard: React.FC = () => {
 
           {/* 3rd Place */}
           <div className="order-3 pt-12">
-            <Card className="hover-lift text-center p-4 bg-gradient-to-b from-amber-600/10 to-amber-600/5 border-amber-600/20">
+            <Card className="text-center p-4 bg-secondary border-border">
               <div className="relative mb-3">
                 <Avatar className="h-14 w-14 mx-auto border-4 border-amber-600">
                   <AvatarImage src={topThree[2]?.avatar} />
@@ -101,7 +101,7 @@ const Leaderboard: React.FC = () => {
           </Card>
           <Card className="hover-lift">
             <CardContent className="p-4 text-center">
-              <Trophy className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+              <Trophy className="h-8 w-8 mx-auto mb-2 text-warning" />
               <p className="text-2xl font-bold">{mockLeaderboard.length}</p>
               <p className="text-sm text-muted-foreground">Participants</p>
             </CardContent>

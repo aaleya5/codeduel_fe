@@ -9,10 +9,12 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children, showNavbar = true }) => {
   return (
     <div className="min-h-screen bg-background">
+      <div className="app-shell">
       {showNavbar && <Navbar />}
       <main className="container py-6 animate-fade-in">
         {children}
       </main>
+      </div>
     </div>
   );
 };

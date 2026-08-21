@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Code2,
   LogOut,
   Moon,
   Sun,
@@ -35,17 +34,15 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <nav className="w-full border-b border-border bg-card">
+      <div className="container flex min-h-14 items-center justify-between gap-4">
         <Link
           to="/"
-          className="flex items-center gap-2 font-semibold transition-colors hover:text-primary"
+          className="flex items-center gap-2 font-semibold"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
-            <Code2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="hidden text-lg sm:inline-block">
-            LeetCode Tracker
+          <span className="flex items-center gap-2 instrument-label font-bold">
+            <span className="h-2 w-2 bg-primary" />
+            CODEDUEL <span className="text-muted-foreground">S-4</span>
           </span>
         </Link>
 
