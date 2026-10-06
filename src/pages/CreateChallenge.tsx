@@ -211,7 +211,7 @@ const CreateChallenge: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="penaltyAmount">Penalty Amount ($)</Label>
+                <Label htmlFor="penaltyAmount">Penalty Amount (Rs.)</Label>
                 <Input
                   id="penaltyAmount"
                   type="number"
