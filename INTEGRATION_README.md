@@ -1,241 +1,180 @@
-# Frontend-Backend Integration Guide
+# Frontend–Backend Integration Guide
 
-## ✅ Integration Complete!
+This guide documents the current React frontend and Express/Prisma backend
+integration. The backend runs at `http://localhost:3000` by default; Vite
+typically runs at `http://localhost:5173`.
 
-The frontend has been successfully integrated with the backend API. Here's what was done:
+## Run locally
 
-## Changes Made
+1. Configure the backend `.env` with `DATABASE_URL`, `JWT_SECRET`,
+   `ENCRYPTION_KEY`, and other required settings.
+2. From `codeduel_be`, install dependencies, generate the Prisma client, and
+   apply the schema to your local PostgreSQL database:
 
-### 1. **API Service Layer** (`src/lib/api.ts`)
+   ```bash
+   npm install
+   npx prisma generate
+   npx prisma db push
+   npm run dev
+   ```
 
-- Created centralized Axios instance with:
-  - Base URL configuration from environment variables
-  - JWT token interceptor (auto-adds to headers)
-  - 401 error handling (auto-logout on unauthorized)
-- Implemented all API methods:
-  - Auth: login, register, getProfile, updateProfile
-  - Challenges: create, getAll, getById, join, updateStatus
-  - Dashboard: getOverview, getTodayStatus, getChallengeProgress, getChallengeLeaderboard
-  - LeetCode: session management, profile, test connection
+   `npm run prisma:migrate` can be used if you are maintaining Prisma
+   migrations for your environment.
+3. Set `VITE_API_URL=http://localhost:3000` in the frontend `.env`.
+4. From `codeduel_fe`, run:
 
-### 2. **Environment Configuration** (`.env`)
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-```env
-VITE_API_URL=http://localhost:3000
-```
+The frontend Axios client sends the stored JWT as a bearer token for protected
+API calls. Register or sign in before opening protected routes. Invite links
+retain their destination through the login/register flow.
 
-### 3. **AuthContext Updated** (`src/contexts/AuthContext.tsx`)
+## Authentication and LeetCode setup
 
-- Replaced mock authentication with real API calls
-- Stores JWT token in localStorage
-- Persists user session across page refreshes
-- Auto-logout on 401 errors
+- Register with `email`, `username`, `password`, and `leetcodeUsername`, or
+  sign in with `emailOrUsername` and `password`.
+- The frontend stores the returned JWT and attaches it to subsequent requests.
+- Set or update your LeetCode username in Settings.
+- To load the private LeetCode profile/calendar, store a LeetCode session from
+  Settings. The session is encrypted by the backend. Never share or commit
+  LeetCode cookies, CSRF tokens, JWTs, or API secrets.
+- The LeetCode profile endpoint returns calendar data for the account's active
+  years. The frontend derives current and best streaks from those dated
+  calendar entries.
+- The Recent Submissions panel uses the connection-test endpoint to retrieve
+  the latest accepted submissions. Date-specific heatmap clicks use
+  `GET /api/leetcode/submissions/:username?date=YYYY-MM-DD`; LeetCode only
+  exposes individual submissions for a bounded recent window, so older active
+  heatmap days may not have a submission list.
 
-### 4. **Pages Updated with Real APIs**
+## Challenge invitations and templates
 
-#### Login Page (`src/pages/Login.tsx`)
+- Every challenge has an invite code. Owners can copy the invite URL from the
+  challenge page and share it with signed-in users.
+- Opening `/invite/:inviteCode` previews challenge rules and dates.
+- Joining creates a pending request. It does not add membership until the
+  challenge owner approves it from the Join Requests controls.
+- Owners can reject pending requests. A rejected user can submit a new request.
+- The create-challenge form provides **30-day consistency** (one problem per
+  day) and **two problems per day** templates. Custom challenge settings are
+  still supported.
 
-- Already connected to AuthContext ✅
-- Handles API errors gracefully
+## API reference
 
-#### Register Page (`src/pages/Register.tsx`)
+All endpoints below are mounted under `http://localhost:3000`. Unless marked
+public, they require `Authorization: Bearer <jwt_token>`. The Postman
+collection is in `../codeduel_be/Postman_Collection.json`.
 
-- Already connected to AuthContext ✅
-- Creates user with backend API
+### Authentication
 
-#### Dashboard (`src/pages/Dashboard.tsx`)
+| Method | Path | Access |
+| --- | --- | --- |
+| POST | `/api/auth/register` | Public |
+| POST | `/api/auth/login` | Public |
+| GET | `/api/auth/profile` | Authenticated |
+| PUT | `/api/auth/profile` | Authenticated |
 
-- Loads real dashboard data from `/api/dashboard`
-- Fetches today's status
-- Displays active challenges
-- Shows loading states
+### Challenges
 
-#### Create Challenge (`src/pages/CreateChallenge.tsx`)
+| Method | Path | Access |
+| --- | --- | --- |
+| POST | `/api/challenges` | Authenticated |
+| GET | `/api/challenges` | Authenticated; optional `status`, `owned` query |
+| GET | `/api/challenges/invite/:inviteCode` | Authenticated |
+| POST | `/api/challenges/invite/:inviteCode/request` | Authenticated |
+| GET | `/api/challenges/:id` | Authenticated |
+| POST | `/api/challenges/:id/join` | Authenticated; creates a pending request |
+| GET | `/api/challenges/:id/join-requests` | Challenge owner |
+| PATCH | `/api/challenges/:id/join-requests/:requestId` | Challenge owner; `{ "decision": "APPROVED" \| "REJECTED" }` |
+| PATCH | `/api/challenges/:id/status` | Challenge owner |
+| PATCH | `/api/challenges/:id` | Challenge owner; update rules |
+| DELETE | `/api/challenges/:id/members/:memberId` | Challenge owner |
+| POST | `/api/challenges/:id/members/:memberId/penalty-adjustment` | Challenge owner |
+| GET | `/api/challenges/:id/disputes` | Challenge owner |
+| POST | `/api/challenges/:id/penalties/:penaltyId/dispute` | Authenticated member |
+| POST | `/api/challenges/:id/penalties/:penaltyId/resolve` | Challenge owner |
 
-- Submits challenge data to `/api/challenges`
-- Maps frontend difficulty to backend difficultyFilter
-- Handles validation and errors
-- Added description field
+### Dashboard and activity
 
-#### Challenge Page (`src/pages/ChallengePage.tsx`)
+| Method | Path | Access |
+| --- | --- | --- |
+| GET | `/api/dashboard` | Authenticated |
+| GET | `/api/dashboard/today` | Authenticated |
+| GET | `/api/dashboard/challenge/:challengeId` | Authenticated member |
+| GET | `/api/dashboard/challenge/:challengeId/leaderboard` | Authenticated |
+| GET | `/api/dashboard/challenge/:challengeId/chart` | Authenticated |
+| GET | `/api/dashboard/activity-heatmap` | Authenticated |
+| GET | `/api/dashboard/stats` | Authenticated |
+| GET | `/api/dashboard/submission-chart` | Authenticated |
+| GET | `/api/dashboard/leaderboard` | Authenticated |
+| POST | `/api/dashboard/evaluate` | Authenticated challenge owner; `{ "challengeId": "...", "date": "YYYY-MM-DD" }`, date optional |
 
-- Loads challenge details from `/api/challenges/:id`
-- Fetches leaderboard data
-- Implements "Join Challenge" functionality
-- Shows loading states
+### LeetCode
 
-### 5. **Protected Routes** (`src/components/common/ProtectedRoute.tsx`)
+| Method | Path | Access |
+| --- | --- | --- |
+| POST | `/api/leetcode/session` | Authenticated |
+| GET | `/api/leetcode/session` | Authenticated |
+| DELETE | `/api/leetcode/session` | Authenticated |
+| GET | `/api/leetcode/profile/:username` | Authenticated |
+| GET | `/api/leetcode/submissions/:username?date=YYYY-MM-DD` | Authenticated |
+| GET | `/api/leetcode/test/:username` | Authenticated; tests connection and returns recent accepted submissions |
+| GET | `/api/leetcode/problem/:titleSlug` | Authenticated |
 
-- Already implemented in App.tsx ✅
-- Redirects unauthenticated users to login
+### Notifications
 
-## Running the Application
+| Method | Path | Access |
+| --- | --- | --- |
+| GET | `/api/notifications` | Authenticated; optional `unreadOnly=true` |
+| GET | `/api/notifications/unread-count` | Authenticated |
+| PATCH | `/api/notifications/read-all` | Authenticated |
+| PATCH | `/api/notifications/:id/read` | Authenticated |
 
-### Start Backend:
+### Payments
 
-```bash
-cd backend
-npm start
-```
+| Method | Path | Access |
+| --- | --- | --- |
+| POST | `/api/payments/create-order` | Authenticated member |
+| POST | `/api/payments/verify` | Authenticated member |
+| GET | `/api/payments/history/:memberId` | Membership owner |
+| POST | `/api/payments/manual` | Challenge owner |
+| GET | `/api/payments/ledger/:memberId` | Member or challenge owner |
 
-Backend runs on: `http://localhost:3000`
+### Health
 
-### Start Frontend:
+| Method | Path | Access |
+| --- | --- | --- |
+| GET | `/health` | Public |
+| GET | `/` | Public API root |
 
-```bash
-cd frontend
-npm install  # if you haven't already
-npm run dev
-```
+## Postman workflow
 
-Frontend runs on: `http://localhost:5173` (or similar Vite port)
-
-## Testing the Integration
-
-### 1. Register/Login Flow:
-
-1. Go to `/register`
-2. Create an account with your LeetCode username
-3. You'll be auto-logged in and redirected to dashboard
-
-### 2. Create Challenge:
-
-1. Click "New Challenge" button
-2. Fill in challenge details (name, target, difficulty, dates)
-3. Submit - you'll see it in your dashboard
-
-### 3. Join Challenge:
-
-1. Navigate to a challenge page
-2. Click "Join Challenge"
-3. You'll be added to the leaderboard
-
-### 4. Dashboard:
-
-- View all active challenges
-- See today's status
-- Check penalties and stats
-
-## API Request Examples
-
-### Login:
-
-```javascript
-POST /api/auth/login
-{
-  "emailOrUsername": "Krishna",
-  "password": "password123"
-}
-```
-
-### Create Challenge:
-
-```javascript
-POST / api / challenges;
-Authorization: Bearer <
-  token >
-  {
-    name: "January 2026 Challenge",
-    description: "Solve 1 problem daily",
-    minSubmissionsPerDay: 1,
-    difficultyFilter: ["Medium", "Hard"],
-    uniqueProblemConstraint: true,
-    penaltyAmount: 100,
-    startDate: "2026-01-07T00:00:00.000Z",
-    endDate: "2026-01-31T23:59:59.999Z",
-  };
-```
-
-## Known Limitations / TODO
-
-1. **Activity Heatmap** - Still using mock data (backend doesn't provide this yet)
-2. **Progress Chart** - Still using mock data (needs submission history endpoint)
-3. **Streak Calculation** - Not yet implemented in backend
-4. **Profile Picture** - Using Dicebear avatars (no upload yet)
+1. Set `base_url` to the backend origin.
+2. Register or log in. The collection scripts save the JWT to `jwt_token`.
+3. Store a LeetCode session before testing profile and submission endpoints.
+4. Create a challenge to populate `challenge_id`; its response also contains
+   `inviteCode`, which can be used to test invite preview and requests.
+5. Use a second account to submit a join request. Review and resolve it using
+   the challenge owner's token.
+6. Payment order creation and verification require valid Razorpay credentials
+   and a real provider checkout flow. Manual payment recording is suitable for
+   local API testing.
 
 ## Troubleshooting
 
-### CORS Errors:
-
-Backend already has CORS configured for `http://localhost:5173`. If using different port, update `backend/.env`:
-
-```env
-CORS_ORIGIN=http://localhost:YOUR_PORT
-```
-
-### 401 Errors:
-
-- Check if JWT token is in localStorage (`auth_token`)
-- Verify backend JWT_SECRET matches
-- Token expires after 7 days
-
-### Connection Refused:
-
-- Ensure backend is running on port 3000
-- Check `VITE_API_URL` in frontend `.env`
-
-## Next Steps
-
-To fully complete the integration:
-
-1. **Add LeetCode Session Management UI**
-
-   - Create a settings page for users to add their LeetCode session cookies
-   - Use `/api/leetcode/session` endpoints
-
-2. **Implement Real Activity Data**
-
-   - Backend needs to track daily submissions
-   - Create endpoints for submission history
-
-3. **Add Real-time Updates**
-
-   - Consider WebSocket for live leaderboard updates
-   - Auto-refresh dashboard data
-
-4. **Error Boundary**
-
-   - Add React Error Boundary for better error handling
-
-5. **Loading Skeletons**
-   - Replace basic spinners with skeleton loaders
-
-## File Structure
-
-```
-frontend/
-├── src/
-│   ├── lib/
-│   │   └── api.ts           # ✨ NEW: Centralized API service
-│   ├── contexts/
-│   │   └── AuthContext.tsx  # ✅ Updated with real APIs
-│   ├── pages/
-│   │   ├── Login.tsx         # ✅ Connected
-│   │   ├── Register.tsx      # ✅ Connected
-│   │   ├── Dashboard.tsx     # ✅ Updated
-│   │   ├── CreateChallenge.tsx  # ✅ Updated
-│   │   └── ChallengePage.tsx    # ✅ Updated
-│   └── components/
-│       └── common/
-│           └── ProtectedRoute.tsx  # ✨ NEW
-└── .env                     # ✨ NEW: Environment config
-```
-
-## Success Checklist
-
-- ✅ Backend APIs working (tested with Postman)
-- ✅ Frontend API service created
-- ✅ Authentication flow working
-- ✅ Protected routes implemented
-- ✅ Dashboard showing real data
-- ✅ Challenge creation working
-- ✅ Challenge joining working
-- ✅ Error handling in place
-- ✅ Loading states added
-- ✅ JWT token persistence
-
----
-
-**Integration Status**: ✅ **COMPLETE & READY FOR USE**
-
-The frontend and backend are now fully connected. Users can register, login, create challenges, join challenges, and view their dashboard with real data from the backend!
+- **401 Unauthorized:** sign in again and confirm the bearer token is current.
+- **LeetCode profile unavailable:** check the configured username and stored
+  session status in Settings.
+- **No accepted submissions:** the endpoint returns the latest accepted
+  submissions, not only submissions from yesterday; confirm the selected
+  LeetCode account has accepted submissions.
+- **Empty date-specific submission list:** individual submissions may be
+  outside LeetCode's recent-submission window even when the heatmap shows an
+  older active day.
+- **CORS or connection errors:** ensure the backend is running and set
+  `CORS_ORIGIN` to the actual Vite origin.
+- **Schema/client mismatch:** after changing `prisma/schema.prisma`, apply the
+  schema and regenerate Prisma Client before restarting the backend.
