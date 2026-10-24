@@ -4,6 +4,9 @@ This guide documents the current React frontend and Express/Prisma backend
 integration. The backend runs at `http://localhost:3000` by default; Vite
 typically runs at `http://localhost:5173`.
 
+For submission priorities, verification work, known risks, and future features,
+see the [CodeDuel project roadmap](../PROJECT_ROADMAP.md).
+
 ## Run locally
 
 1. Configure the backend `.env` with `DATABASE_URL`, `JWT_SECRET`,
