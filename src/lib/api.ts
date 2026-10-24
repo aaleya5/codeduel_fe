@@ -30,12 +30,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Clear auth on 401
+    const isAuthRequest =
+      error.config?.url?.includes("/api/auth/login") ||
+      error.config?.url?.includes("/api/auth/register");
+
+    if (error.response?.status === 401 && !isAuthRequest) {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("user");
-      window.location.href = "/login";
+
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
     }
+
     return Promise.reject(error);
   }
 );
@@ -63,6 +70,7 @@ interface RegisterResponse extends LoginResponse {}
 
 interface ChallengeResponse {
   id: string;
+  inviteCode?: string;
   name: string;
   description: string;
   minSubmissionsPerDay: number;
@@ -186,12 +194,145 @@ export const challengeApi = {
     return response.data;
   },
 
+  getInviteDetails: async (inviteCode: string) => {
+    const response = await api.get<ApiResponse<any>>(
+      `/api/challenges/invite/${encodeURIComponent(inviteCode)}`
+    );
+    return response.data;
+  },
+
+  requestToJoinByInvite: async (inviteCode: string) => {
+    const response = await api.post<ApiResponse<any>>(
+      `/api/challenges/invite/${encodeURIComponent(inviteCode)}/request`
+    );
+    return response.data;
+  },
+
+  getJoinRequests: async (id: string) => {
+    const response = await api.get<ApiResponse<any[]>>(
+      `/api/challenges/${id}/join-requests`
+    );
+    return response.data;
+  },
+
+  resolveJoinRequest: async (
+    id: string,
+    requestId: string,
+    decision: "APPROVED" | "REJECTED"
+  ) => {
+    const response = await api.patch<ApiResponse<any>>(
+      `/api/challenges/${id}/join-requests/${requestId}`,
+      { decision }
+    );
+    return response.data;
+  },
+
   updateStatus: async (id: string, status: string) => {
     const response = await api.patch<ApiResponse<ChallengeResponse>>(
       `/api/challenges/${id}/status`,
       {
         status,
       }
+    );
+    return response.data;
+  },
+
+  updateRules: async (
+    id: string,
+    data: Partial<{
+      name: string;
+      description: string;
+      minSubmissionsPerDay: number;
+      difficultyFilter: string[];
+      uniqueProblemConstraint: boolean;
+      penaltyAmount: number;
+      endDate: string;
+    }>
+  ) => {
+    const response = await api.patch<ApiResponse<ChallengeResponse>>(
+      `/api/challenges/${id}`,
+      data
+    );
+    return response.data;
+  },
+
+  removeMember: async (id: string, memberId: string) => {
+    const response = await api.delete<ApiResponse<any>>(
+      `/api/challenges/${id}/members/${memberId}`
+    );
+    return response.data;
+  },
+
+  adjustMemberPenalty: async (
+    id: string,
+    memberId: string,
+    amount: number,
+    reason: string
+  ) => {
+    const response = await api.post<ApiResponse<any>>(
+      `/api/challenges/${id}/members/${memberId}/penalty-adjustment`,
+      { amount, reason }
+    );
+    return response.data;
+  },
+
+  disputePenalty: async (id: string, penaltyId: string, reason: string) => {
+    const response = await api.post<ApiResponse<any>>(
+      `/api/challenges/${id}/penalties/${penaltyId}/dispute`,
+      { reason }
+    );
+    return response.data;
+  },
+
+  getDisputes: async (id: string) => {
+    const response = await api.get<ApiResponse<any[]>>(
+      `/api/challenges/${id}/disputes`
+    );
+    return response.data;
+  },
+
+  resolveDispute: async (
+    id: string,
+    penaltyId: string,
+    action: "UPHOLD" | "WAIVE",
+    note?: string
+  ) => {
+    const response = await api.post<ApiResponse<any>>(
+      `/api/challenges/${id}/penalties/${penaltyId}/resolve`,
+      { action, note }
+    );
+    return response.data;
+  },
+};
+
+// ============================================================================
+// NOTIFICATION APIs
+// ============================================================================
+export const notificationApi = {
+  getAll: async (unreadOnly?: boolean) => {
+    const response = await api.get<ApiResponse<any[]>>("/api/notifications", {
+      params: unreadOnly ? { unreadOnly: "true" } : undefined,
+    });
+    return response.data;
+  },
+
+  getUnreadCount: async () => {
+    const response = await api.get<ApiResponse<{ count: number }>>(
+      "/api/notifications/unread-count"
+    );
+    return response.data;
+  },
+
+  markAsRead: async (id: string) => {
+    const response = await api.patch<ApiResponse<any>>(
+      `/api/notifications/${id}/read`
+    );
+    return response.data;
+  },
+
+  markAllAsRead: async () => {
+    const response = await api.patch<ApiResponse<any>>(
+      "/api/notifications/read-all"
     );
     return response.data;
   },
@@ -247,6 +388,20 @@ export const dashboardApi = {
     );
     return response.data;
   },
+
+  getGlobalLeaderboard: async () => {
+    const response = await api.get<ApiResponse<any>>(
+      "/api/dashboard/leaderboard"
+    );
+    return response.data;
+  },
+
+  getChallengeChart: async (challengeId: string) => {
+    const response = await api.get<ApiResponse<any>>(
+      `/api/dashboard/challenge/${challengeId}/chart`
+    );
+    return response.data;
+  },
 };
 
 // ============================================================================
@@ -285,6 +440,14 @@ export const leetcodeApi = {
     return response.data;
   },
 
+  getSubmissionsForDate: async (username: string, date: string) => {
+    const response = await api.get<ApiResponse<any[]>>(
+      `/api/leetcode/submissions/${username}`,
+      { params: { date } }
+    );
+    return response.data;
+  },
+
   testConnection: async (username: string) => {
     const response = await api.get<ApiResponse<any>>(
       `/api/leetcode/test/${username}`
@@ -296,6 +459,84 @@ export const leetcodeApi = {
     const response = await api.get<ApiResponse<any>>(
       `/api/leetcode/problem/${titleSlug}`
     );
+    return response.data;
+  },
+};
+
+// ============================================================================
+// PAYMENT APIs (Razorpay)
+// ============================================================================
+export const paymentApi = {
+  createOrder: async (memberId: string, amount: number) => {
+    const response = await api.post<
+      ApiResponse<{
+        orderId: string;
+        amount: number;
+        currency: string;
+        keyId: string;
+        challengeName: string;
+      }>
+    >("/api/payments/create-order", { memberId, amount });
+    return response.data;
+  },
+
+  verifyPayment: async (payload: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) => {
+    const response = await api.post<ApiResponse<any>>(
+      "/api/payments/verify",
+      payload
+    );
+    return response.data;
+  },
+
+  getHistory: async (memberId: string) => {
+    const response = await api.get<ApiResponse<any[]>>(
+      `/api/payments/history/${memberId}`
+    );
+    return response.data;
+  },
+
+  recordManualPayment: async (
+    challengeId: string,
+    memberId: string,
+    amount: number,
+    note?: string
+  ) => {
+    const response = await api.post<ApiResponse<any>>("/api/payments/manual", {
+      challengeId,
+      memberId,
+      amount,
+      note,
+    });
+    return response.data;
+  },
+
+  getFullLedger: async (memberId: string) => {
+    const response = await api.get<
+      ApiResponse<{
+        challengeName: string;
+        totalPenalties: number;
+        totalPaid: number;
+        outstanding: number;
+        events: Array<{
+          type: "PENALTY" | "PAYMENT";
+          id: string;
+          amount: number;
+          date: string;
+          runningBalance: number;
+          reason?: string;
+          disputed?: boolean;
+          disputeStatus?: string;
+          disputeReason?: string;
+          resolutionNote?: string;
+          method?: string;
+          note?: string;
+        }>;
+      }>
+    >(`/api/payments/ledger/${memberId}`);
     return response.data;
   },
 };

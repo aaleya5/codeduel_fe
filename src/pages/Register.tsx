@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Code2, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ const Register: React.FC = () => {
   
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   const validate = () => {
@@ -58,7 +59,7 @@ const Register: React.FC = () => {
         title: 'Account created!',
         description: 'Welcome to LeetCode Tracker.',
       });
-      navigate('/');
+      navigate(location.state?.from ?? '/');
     } catch {
       toast({
         title: 'Registration failed',
@@ -172,7 +173,11 @@ const Register: React.FC = () => {
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Already have an account?{' '}
-              <Link to="/login" className="font-medium text-primary hover:underline">
+              <Link
+                to="/login"
+                state={location.state}
+                className="font-medium text-primary hover:underline"
+              >
                 Sign in
               </Link>
             </div>

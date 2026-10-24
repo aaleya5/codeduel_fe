@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -76,6 +77,8 @@ const Navbar: React.FC = () => {
         )}
 
         <div className="flex items-center gap-2">
+          {isAuthenticated && <NotificationBell />}
+
           <Button
             variant="ghost"
             size="icon"

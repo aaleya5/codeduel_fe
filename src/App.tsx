@@ -2,7 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
@@ -18,6 +24,7 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Leetcode from "./pages/Leetcode";
+import InviteChallenge from "./pages/InviteChallenge";
 
 const queryClient = new QueryClient();
 
@@ -25,13 +32,14 @@ const queryClient = new QueryClient();
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const location = useLocation();
   const { isAuthenticated ,isLoading } = useAuth();
   if (isLoading) {
     return null;
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
@@ -39,12 +47,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
 // Auth Route wrapper (redirect if already logged in)
 const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
   const { isAuthenticated , isLoading} = useAuth();
   if (isLoading) {
     return null;
   }
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={location.state?.from ?? "/"} replace />;
   }
 
   return <>{children}</>;
@@ -98,6 +107,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ChallengePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/invite/:inviteCode"
+        element={
+          <ProtectedRoute>
+            <InviteChallenge />
           </ProtectedRoute>
         }
       />

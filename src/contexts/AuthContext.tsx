@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User } from "@/types";
 import { authApi } from "@/lib/api";
+import { getSocket, disconnectSocket } from "@/lib/socket";
 
 interface AuthContextType {
   user: User | null;
@@ -34,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (token && savedUser) {
         try {
           setUser(JSON.parse(savedUser));
+          getSocket(); // establish the real-time connection for the restored session
         } catch (error) {
           console.error("Failed to parse user:", error);
           localStorage.removeItem("auth_token");
@@ -66,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem("auth_token", token);
         localStorage.setItem("user", JSON.stringify(mappedUser));
         setUser(mappedUser);
+        getSocket();
       } else {
         throw new Error(response.message || "Login failed");
       }
@@ -104,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem("auth_token", token);
         localStorage.setItem("user", JSON.stringify(mappedUser));
         setUser(mappedUser);
+        getSocket();
       } else {
         throw new Error(response.message || "Registration failed");
       }
@@ -116,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem("auth_token");
     localStorage.removeItem("user");
     setUser(null);
+    disconnectSocket();
   };
 
   const updateUser = (updatedUser: User) => {

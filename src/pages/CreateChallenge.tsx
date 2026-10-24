@@ -26,6 +26,7 @@ import { challengeApi } from "@/lib/api";
 const CreateChallenge: React.FC = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [template, setTemplate] = useState("custom");
   const [dailyTarget, setDailyTarget] = useState("2");
   const [difficulty, setDifficulty] = useState("any");
   const [penaltyAmount, setPenaltyAmount] = useState("5");
@@ -36,6 +37,31 @@ const CreateChallenge: React.FC = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleTemplateChange = (value: string) => {
+    setTemplate(value);
+    if (value === "custom") return;
+
+    const target = value === "consistency" ? "1" : "2";
+    setDailyTarget(target);
+    if (!name.trim()) {
+      setName(
+        value === "consistency"
+          ? "30-day consistency"
+          : "2 problems per day"
+      );
+    }
+    if (startDate) {
+      setEndDate(addDaysToDateString(startDate, 29));
+    }
+  };
+
+  const handleStartDateChange = (value: string) => {
+    setStartDate(value);
+    if (template !== "custom" && value) {
+      setEndDate(addDaysToDateString(value, 29));
+    }
+  };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -172,6 +198,30 @@ const CreateChallenge: React.FC = () => {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="template">Challenge Template</Label>
+                <Select value={template} onValueChange={handleTemplateChange}>
+                  <SelectTrigger id="template">
+                    <SelectValue placeholder="Choose a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="custom">Custom challenge</SelectItem>
+                    <SelectItem value="consistency">
+                      30-day consistency (1 problem/day)
+                    </SelectItem>
+                    <SelectItem value="two-problems">
+                      2 problems per day (30 days)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {template !== "custom" && (
+                  <p className="text-xs text-muted-foreground">
+                    The template sets a 30-day duration. You can still edit the
+                    dates and daily target.
+                  </p>
+                )}
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="dailyTarget">Daily Target</Label>
@@ -238,7 +288,7 @@ const CreateChallenge: React.FC = () => {
                     id="startDate"
                     type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={(e) => handleStartDateChange(e.target.value)}
                     className={errors.startDate ? "border-destructive" : ""}
                   />
                   {errors.startDate && (
@@ -296,3 +346,12 @@ const CreateChallenge: React.FC = () => {
 };
 
 export default CreateChallenge;
+
+function addDaysToDateString(date: string, days: number) {
+  const result = new Date(`${date}T12:00:00`);
+  result.setDate(result.getDate() + days);
+  const year = result.getFullYear();
+  const month = String(result.getMonth() + 1).padStart(2, "0");
+  const day = String(result.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}

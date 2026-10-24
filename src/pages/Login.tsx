@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Code2, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,30 +9,34 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  
+  const [errors, setErrors] = useState<{ identifier?: string; password?: string }>({});
+
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   const validate = () => {
-    const newErrors: { email?: string; password?: string } = {};
-    
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Please enter a valid email';
+    const newErrors: { identifier?: string; password?: string } = {};
+
+    if (!identifier.trim()) {
+      newErrors.identifier = 'Username or email is required';
+    } else if (
+      identifier.includes('@') &&
+      !/^\S+@\S+\.\S+$/.test(identifier)
+    ) {
+      newErrors.identifier = 'Please enter a valid email or username';
     }
-    
+
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -40,16 +44,16 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!validate()) return;
-    
+
     try {
-      await login(email, password);
+      await login(identifier.trim(), password);
       toast({
         title: 'Welcome back!',
         description: 'Successfully logged in.',
       });
-      navigate('/');
+      navigate(location.state?.from ?? '/');
     } catch {
       toast({
         title: 'Login failed',
@@ -81,17 +85,17 @@ const Login: React.FC = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="identifier">Username or Email</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={errors.email ? 'border-destructive' : ''}
+                  id="identifier"
+                  type="text"
+                  placeholder="alexdemo or you@example.com"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className={errors.identifier ? 'border-destructive' : ''}
                 />
-                {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email}</p>
+                {errors.identifier && (
+                  <p className="text-xs text-destructive">{errors.identifier}</p>
                 )}
               </div>
 
@@ -133,7 +137,11 @@ const Login: React.FC = () => {
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Don't have an account?{' '}
-              <Link to="/register" className="font-medium text-primary hover:underline">
+              <Link
+                to="/register"
+                state={location.state}
+                className="font-medium text-primary hover:underline"
+              >
                 Sign up
               </Link>
             </div>
