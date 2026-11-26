@@ -65,7 +65,7 @@ const MembersList: React.FC<MembersListProps> = ({ members, currentUserId }) => 
                   <span>{member.streak} day streak</span>
                 </div>
                 {member.totalPenalty > 0 && (
-                  <span className="text-destructive">${member.totalPenalty} penalty</span>
+                  <span className="text-destructive">₹{member.totalPenalty} penalty</span>
                 )}
               </div>
             </div>

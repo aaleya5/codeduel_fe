@@ -4,7 +4,7 @@ import {
   Users,
   Calendar,
   Target,
-  DollarSign,
+  IndianRupee,
   ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,19 +26,39 @@ const difficultyColors = {
   any: "bg-primary/10 text-primary border-primary/20",
 };
 
+const toUtcStartOfDay = (dateString: string) => {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+};
+
 const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge }) => {
-  const daysRemaining = Math.ceil(
-    (new Date(challenge.endDate).getTime() - new Date().getTime()) /
-      (1000 * 60 * 60 * 24)
+  const totalDays = Math.max(
+    1,
+    Math.round(
+      (toUtcStartOfDay(challenge.endDate).getTime() -
+        toUtcStartOfDay(challenge.startDate).getTime()) /
+        (1000 * 60 * 60 * 24)
+    )
   );
 
-  const totalDays = Math.ceil(
-    (new Date(challenge.endDate).getTime() -
-      new Date(challenge.startDate).getTime()) /
-      (1000 * 60 * 60 * 24)
+  const todayUtc = new Date();
+  todayUtc.setUTCHours(0, 0, 0, 0);
+
+  const daysRemaining = Math.max(
+    0,
+    Math.ceil(
+      (toUtcStartOfDay(challenge.endDate).getTime() - todayUtc.getTime()) /
+        (1000 * 60 * 60 * 24)
+    )
   );
 
-  const progress = Math.round(((totalDays - daysRemaining) / totalDays) * 100);
+  const progress = Math.min(
+    100,
+    Math.max(
+      0,
+      Math.round(((totalDays - daysRemaining) / totalDays) * 100)
+    )
+  );
   const completedMembers =
     challenge.members?.filter((m) => m.status === "completed").length || 0;
 
@@ -113,8 +133,8 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge }) => {
               <span>{challenge.minSubmissionsPerDay || 1}/day</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <DollarSign className="h-4 w-4" />
-              <span>${challenge.penaltyAmount} penalty</span>
+              <IndianRupee className="h-4 w-4" />
+              <span>₹{challenge.penaltyAmount} penalty</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-4 w-4" />

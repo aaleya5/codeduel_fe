@@ -18,6 +18,34 @@ interface PayPenaltyButtonProps {
  * Renders nothing if there's no outstanding balance - callers don't need
  * to guard on `outstanding > 0` themselves.
  */
+type RazorpayInstance = {
+  open: () => void;
+  on: (event: "payment.failed", handler: (response: { error?: { description?: string } }) => void) => void;
+};
+
+type RazorpayOptions = {
+  key: string;
+  order_id: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  prefill: { name?: string; email?: string };
+  theme: { color: string };
+  handler: (response: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) => Promise<void>;
+  modal: { ondismiss: () => void };
+};
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
 const PayPenaltyButton: React.FC<PayPenaltyButtonProps> = ({
   memberId,
   outstanding,
@@ -50,7 +78,12 @@ const PayPenaltyButton: React.FC<PayPenaltyButtonProps> = ({
       }
       const { orderId, amount, currency, keyId } = orderResponse.data;
 
-      const razorpay = new (window as any).Razorpay({
+      const RazorpayCtor = window.Razorpay;
+      if (!RazorpayCtor) {
+        throw new Error("Razorpay SDK failed to initialize.");
+      }
+
+      const razorpay = new RazorpayCtor({
         key: keyId,
         order_id: orderId,
         amount,
@@ -59,7 +92,7 @@ const PayPenaltyButton: React.FC<PayPenaltyButtonProps> = ({
         description: challengeName ? `Penalty payment - ${challengeName}` : "Penalty payment",
         prefill: { name: user?.name, email: user?.email },
         theme: { color: "#6366f1" },
-        handler: async (response: any) => {
+        handler: async (response) => {
           try {
             const verifyResponse = await paymentApi.verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
@@ -69,17 +102,23 @@ const PayPenaltyButton: React.FC<PayPenaltyButtonProps> = ({
             if (verifyResponse.success) {
               toast({
                 title: "Payment received",
-                description: `Your payment was verified and credited to your balance.`,
+                description: "Your payment was verified and credited to your balance.",
               });
               onSuccess?.();
             } else {
               throw new Error(verifyResponse.message || "Verification failed");
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
+            const responseMessage =
+              typeof error === "object" && error !== null && "response" in error
+                ? (error as { response?: { data?: { message?: string } } }).response
+                    ?.data?.message
+                : undefined;
+            const message =
+              error instanceof Error ? error.message : "Please contact support.";
             toast({
               title: "Payment verification failed",
-              description:
-                error.response?.data?.message || error.message || "Please contact support.",
+              description: responseMessage || message || "Please contact support.",
               variant: "destructive",
             });
           }
@@ -89,7 +128,7 @@ const PayPenaltyButton: React.FC<PayPenaltyButtonProps> = ({
         },
       });
 
-      razorpay.on("payment.failed", (response: any) => {
+      razorpay.on("payment.failed", (response) => {
         toast({
           title: "Payment failed",
           description: response.error?.description || "The payment could not be completed.",
@@ -99,11 +138,16 @@ const PayPenaltyButton: React.FC<PayPenaltyButtonProps> = ({
       });
 
       razorpay.open();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const responseMessage =
+        typeof error === "object" && error !== null && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data
+              ?.message
+          : undefined;
+      const message = error instanceof Error ? error.message : "Please try again.";
       toast({
         title: "Couldn't start payment",
-        description:
-          error.response?.data?.message || error.message || "Please try again.",
+        description: responseMessage || message || "Please try again.",
         variant: "destructive",
       });
       setIsProcessing(false);

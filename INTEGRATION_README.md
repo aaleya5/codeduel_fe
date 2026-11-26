@@ -178,6 +178,8 @@ collection is in `../codeduel_be/Postman_Collection.json`.
   outside LeetCode's recent-submission window even when the heatmap shows an
   older active day.
 - **CORS or connection errors:** ensure the backend is running and set
-  `CORS_ORIGIN` to the actual Vite origin.
+  `CORS_ORIGINS` to the exact Vite origin (for example,
+  `http://localhost:8080`); multiple origins are comma-separated. The backend
+  development defaults also allow `http://localhost:5173`.
 - **Schema/client mismatch:** after changing `prisma/schema.prisma`, apply the
   schema and regenerate Prisma Client before restarting the backend.

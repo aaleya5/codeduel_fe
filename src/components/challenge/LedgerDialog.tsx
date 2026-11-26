@@ -75,7 +75,6 @@ const LedgerDialog: React.FC<LedgerDialogProps> = ({
 
   useEffect(() => {
     if (open) loadLedger();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, memberId]);
 
   const loadLedger = async () => {
@@ -124,10 +123,17 @@ const LedgerDialog: React.FC<LedgerDialogProps> = ({
       } else {
         throw new Error(response.message || "Failed to submit dispute");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const responseMessage =
+        typeof error === "object" && error !== null && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data
+              ?.message
+          : undefined;
+      const message =
+        error instanceof Error ? error.message : "Please try again.";
       toast({
         title: "Failed to submit dispute",
-        description: error.response?.data?.message || error.message || "Please try again.",
+        description: responseMessage || message || "Please try again.",
         variant: "destructive",
       });
     } finally {

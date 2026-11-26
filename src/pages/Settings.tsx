@@ -41,8 +41,9 @@ const Settings: React.FC = () => {
   );
 
   useEffect(() => {
+    setLeetcodeUsername(user?.leetcodeUsername || "");
     checkSessionStatus();
-  }, []);
+  }, [user?.leetcodeUsername]);
 
   const checkSessionStatus = async () => {
     try {
@@ -222,10 +223,11 @@ const Settings: React.FC = () => {
                           Session Active
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Expires:{" "}
-                          {new Date(
-                            sessionStatus.expiresAt
-                          ).toLocaleDateString()}
+                          {sessionStatus.expiresAt
+                            ? `Expires: ${new Date(
+                                sessionStatus.expiresAt
+                              ).toLocaleDateString()}`
+                            : "No expiry date recorded"}
                         </p>
                       </div>
                       <Button

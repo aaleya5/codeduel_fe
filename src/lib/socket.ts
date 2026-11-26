@@ -3,6 +3,7 @@ import { io, Socket } from "socket.io-client";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 let socket: Socket | null = null;
+let socketToken: string | null = null;
 
 /**
  * Get (or lazily create) the shared Socket.IO connection, authenticated
@@ -14,7 +15,13 @@ export const getSocket = (): Socket | null => {
   const token = localStorage.getItem("auth_token");
   if (!token) return null;
 
+  if (socket && socketToken !== token) {
+    socket.disconnect();
+    socket = null;
+  }
+
   if (!socket) {
+    socketToken = token;
     socket = io(API_BASE_URL, {
       auth: { token },
       autoConnect: true,
@@ -34,4 +41,5 @@ export const disconnectSocket = () => {
     socket.disconnect();
     socket = null;
   }
+  socketToken = null;
 };

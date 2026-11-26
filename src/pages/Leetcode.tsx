@@ -24,8 +24,15 @@ const Leetcode = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user) {
+      setLeetcodeProfile(null);
+      setRecentSubmissions([]);
+      setRecentSubmissionsError("");
+      return;
+    }
+
     loadProfile();
-  }, []);
+  }, [user?.leetcodeUsername]);
 
   useEffect(() => {
     if (!selectedActivityDate || !user?.leetcodeUsername) return;
@@ -105,13 +112,18 @@ const Leetcode = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("Profile updated:", leetcodeProfile);
-  }, [leetcodeProfile]);
   const activityData = formatSubmissionCalendar(
     leetcodeProfile?.submissionCalendar
   );
   const streakStats = calculateCalendarStreaks(activityData);
+
+  const formatDateLabel = (dateKey: string) =>
+    new Intl.DateTimeFormat(undefined, {
+      timeZone: "UTC",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(`${dateKey}T00:00:00.000Z`));
 
   return (
     <Layout>
@@ -242,8 +254,7 @@ const Leetcode = () => {
           <DialogHeader>
             <DialogTitle>
               Accepted submissions
-              {selectedActivityDate &&
-                ` · ${new Date(`${selectedActivityDate}T00:00:00`).toLocaleDateString()}`}
+              {selectedActivityDate && ` · ${formatDateLabel(selectedActivityDate)}`}
             </DialogTitle>
             <DialogDescription>
               Accepted LeetCode submissions found for this day.
@@ -341,12 +352,14 @@ function calculateCalendarStreaks(activity: { date: string; count: number }[]) {
     return { currentStreak: 0, longestStreak: 0 };
   }
 
+  const toUtcDate = (dateKey: string) => new Date(`${dateKey}T00:00:00.000Z`);
+
   let longestStreak = 1;
   let runningStreak = 1;
 
   for (let index = 1; index < activeDates.length; index += 1) {
-    const previous = new Date(`${activeDates[index - 1]}T00:00:00Z`);
-    const current = new Date(`${activeDates[index]}T00:00:00Z`);
+    const previous = toUtcDate(activeDates[index - 1]);
+    const current = toUtcDate(activeDates[index]);
     const isConsecutive =
       current.getTime() - previous.getTime() === 24 * 60 * 60 * 1000;
 
@@ -355,9 +368,20 @@ function calculateCalendarStreaks(activity: { date: string; count: number }[]) {
   }
 
   const today = new Date();
-  const todayKey = today.toISOString().slice(0, 10);
-  today.setUTCDate(today.getUTCDate() - 1);
-  const yesterdayKey = today.toISOString().slice(0, 10);
+  const todayKey = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+  )
+    .toISOString()
+    .slice(0, 10);
+  const yesterdayKey = new Date(
+    Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate() - 1
+    )
+  )
+    .toISOString()
+    .slice(0, 10);
   const latestActiveDate = activeDates[activeDates.length - 1];
 
   if (latestActiveDate !== todayKey && latestActiveDate !== yesterdayKey) {
@@ -366,8 +390,8 @@ function calculateCalendarStreaks(activity: { date: string; count: number }[]) {
 
   let currentStreak = 1;
   for (let index = activeDates.length - 1; index > 0; index -= 1) {
-    const current = new Date(`${activeDates[index]}T00:00:00Z`);
-    const previous = new Date(`${activeDates[index - 1]}T00:00:00Z`);
+    const current = toUtcDate(activeDates[index]);
+    const previous = toUtcDate(activeDates[index - 1]);
     if (current.getTime() - previous.getTime() !== 24 * 60 * 60 * 1000) {
       break;
     }

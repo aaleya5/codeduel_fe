@@ -13,22 +13,22 @@ const Index: React.FC = () => {
     {
       icon: Flame,
       title: 'Streak Tracking',
-      description: 'Build consistency with daily streak tracking and never break your coding momentum.'
+      description: 'Build consistency with daily streak tracking that turns habits into measurable momentum.'
     },
     {
       icon: Trophy,
-      title: 'Compete with Friends',
-      description: 'Create challenges and compete with friends to stay motivated and accountable.'
+      title: 'Challenge Rooms',
+      description: 'Create competitive rooms with friends, teammates, or peers and keep everyone aligned.'
     },
     {
       icon: Users,
-      title: 'Team Challenges',
-      description: 'Join group challenges and climb the leaderboard together.'
+      title: 'Shared Accountability',
+      description: 'Group challenges make consistency easier to maintain and harder to ignore.'
     },
     {
       icon: Zap,
       title: 'Penalty System',
-      description: 'Stay accountable with penalty-based challenges. Miss a day, pay the price!'
+      description: 'Use transparent stakes and real accountability to keep each challenge moving forward.'
     }
   ];
 
@@ -41,7 +41,7 @@ const Index: React.FC = () => {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
               <Code2 className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="hidden text-lg sm:inline-block">LeetCode Tracker</span>
+            <span className="hidden text-lg sm:inline-block">CodeDuel</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
@@ -65,14 +65,14 @@ const Index: React.FC = () => {
               <Zap className="h-4 w-4 text-primary" />
               <span>Track. Compete. Improve.</span>
             </div>
-            
+
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Master LeetCode with
-              <span className="block gradient-text">Daily Consistency</span>
+              Turn daily practice into
+              <span className="block gradient-text">a real coding duel</span>
             </h1>
-            
+
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Track your daily coding progress, compete with friends, and stay accountable with our penalty-based challenge system. Build the habit of consistent problem-solving.
+              Create challenge rooms, track daily LeetCode progress, and keep your squad accountable with transparent penalties, streaks, and live leaderboards.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -88,18 +88,37 @@ const Index: React.FC = () => {
               </Button>
             </div>
 
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground pt-4">
+            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground pt-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-success" />
-                <span>Free to use</span>
+                <span>Daily streaks</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-success" />
-                <span>No credit card</span>
+                <span>Challenge rooms</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-success" />
-                <span>GitHub heatmap</span>
+                <span>Live scoreboards</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card/80 p-4 shadow-sm backdrop-blur">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-left">
+                  <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    Demo ready
+                  </p>
+                  <p className="mt-1 text-base font-medium">Use any demo account to walk through the product instantly</p>
+                </div>
+                <div className="flex flex-wrap gap-2 sm:justify-end">
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/login">Open demo login</Link>
+                  </Button>
+                  <Button size="sm" className="gradient-primary" asChild>
+                    <Link to="/register">Create account</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -109,9 +128,9 @@ const Index: React.FC = () => {
       {/* Features Section */}
       <section className="container py-24">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Everything you need to stay consistent</h2>
+          <h2 className="text-3xl font-bold mb-4">Everything needed to keep the streak alive</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Built for developers who want to improve their problem-solving skills through daily practice and friendly competition.
+            Built for developers and teams who want structured accountability, daily practice, and healthy competition without the chaos of ad hoc tracking.
           </p>
         </div>
         
@@ -134,14 +153,14 @@ const Index: React.FC = () => {
       <section className="container py-24">
         <Card className="gradient-primary p-8 md:p-16 text-center border-0">
           <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-            Ready to level up your coding skills?
+            Ready to turn your practice into a streak story?
           </h2>
           <p className="text-primary-foreground/80 max-w-xl mx-auto mb-8">
-            Join thousands of developers who are building consistent coding habits and crushing their LeetCode goals.
+            Launch your next challenge room, keep your squad honest, and turn daily problem-solving into a real competitive habit.
           </p>
           <Button size="lg" variant="secondary" asChild className="gap-2">
             <Link to="/register">
-              Get Started Free <ArrowRight className="h-4 w-4" />
+              Start Your Duel <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </Card>
@@ -152,10 +171,10 @@ const Index: React.FC = () => {
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Code2 className="h-5 w-5" />
-            <span>LeetCode Tracker</span>
+            <span>CodeDuel</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Built with ❤️ for developers who grind
+            Built for daily coding accountability and competition
           </p>
         </div>
       </footer>

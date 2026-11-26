@@ -8,6 +8,12 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
+const demoAccounts = [
+  { name: 'Alex', username: 'alexdemo', password: 'Demo123!' },
+  { name: 'Sarah', username: 'sarahdemo', password: 'Demo123!' },
+  { name: 'Mike', username: 'mikedemo', password: 'Demo123!' },
+];
+
 const Login: React.FC = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -71,7 +77,7 @@ const Login: React.FC = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary shadow-glow">
               <Code2 className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span>LeetCode Tracker</span>
+            <span>CodeDuel</span>
           </Link>
         </div>
 
@@ -134,6 +140,28 @@ const Login: React.FC = () => {
                 )}
               </Button>
             </form>
+
+            <div className="mt-6 rounded-xl border border-border bg-muted/30 p-3">
+              <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                Quick demo access
+              </p>
+              <div className="space-y-2">
+                {demoAccounts.map((account) => (
+                  <button
+                    key={account.username}
+                    type="button"
+                    onClick={() => {
+                      setIdentifier(account.username);
+                      setPassword(account.password);
+                    }}
+                    className="flex w-full items-center justify-between rounded-lg border border-border bg-background px-3 py-2 text-left text-sm transition-colors hover:border-primary/60 hover:bg-primary/5"
+                  >
+                    <span className="font-medium">{account.name}</span>
+                    <span className="text-muted-foreground">{account.username}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Don't have an account?{' '}

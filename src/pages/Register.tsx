@@ -57,7 +57,7 @@ const Register: React.FC = () => {
       await register(name, email, password, leetcodeUsername);
       toast({
         title: 'Account created!',
-        description: 'Welcome to LeetCode Tracker.',
+        description: 'Welcome to CodeDuel.',
       });
       navigate(location.state?.from ?? '/');
     } catch {
@@ -77,7 +77,7 @@ const Register: React.FC = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary shadow-glow">
               <Code2 className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span>LeetCode Tracker</span>
+            <span>CodeDuel</span>
           </Link>
         </div>
 

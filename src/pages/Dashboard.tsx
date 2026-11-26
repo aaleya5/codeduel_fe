@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Flame, Target, DollarSign, Zap, Trophy, Plus } from "lucide-react";
+import { Flame, Target, IndianRupee, Zap, Trophy, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
@@ -152,9 +152,9 @@ const Dashboard: React.FC = () => {
           />
           <StatsCard
             title="Total Penalties"
-            value={`$${stats.totalPenalties}`}
+            value={`₹${stats.totalPenalties}`}
             subtitle="Avoid missing days!"
-            icon={DollarSign}
+            icon={IndianRupee}
             variant="destructive"
           />
         </div>

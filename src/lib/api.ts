@@ -66,7 +66,7 @@ interface LoginResponse {
   token: string;
 }
 
-interface RegisterResponse extends LoginResponse {}
+type RegisterResponse = LoginResponse;
 
 interface ChallengeResponse {
   id: string;

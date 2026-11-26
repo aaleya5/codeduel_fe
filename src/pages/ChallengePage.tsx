@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   Calendar,
   Target,
-  DollarSign,
+  IndianRupee,
   Users,
   Clock,
   Settings,
@@ -551,18 +551,38 @@ const ChallengePage: React.FC = () => {
     );
   }
 
-  const daysRemaining = Math.ceil(
-    (new Date(challenge.endDate).getTime() - new Date().getTime()) /
-      (1000 * 60 * 60 * 24)
+  const toUtcStartOfDay = (dateString: string) => {
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  };
+
+  const totalDays = Math.max(
+    1,
+    Math.round(
+      (toUtcStartOfDay(challenge.endDate).getTime() -
+        toUtcStartOfDay(challenge.startDate).getTime()) /
+        (1000 * 60 * 60 * 24)
+    )
   );
 
-  const totalDays = Math.ceil(
-    (new Date(challenge.endDate).getTime() -
-      new Date(challenge.startDate).getTime()) /
-      (1000 * 60 * 60 * 24)
+  const todayUtc = new Date();
+  todayUtc.setUTCHours(0, 0, 0, 0);
+
+  const daysRemaining = Math.max(
+    0,
+    Math.ceil(
+      (toUtcStartOfDay(challenge.endDate).getTime() - todayUtc.getTime()) /
+        (1000 * 60 * 60 * 24)
+    )
   );
 
-  const progress = Math.round(((totalDays - daysRemaining) / totalDays) * 100);
+  const progress = Math.min(
+    100,
+    Math.max(
+      0,
+      Math.round(((totalDays - daysRemaining) / totalDays) * 100)
+    )
+  );
   const difficultyDisplay =
     challenge.difficultyFilter && challenge.difficultyFilter.length > 0
       ? challenge.difficultyFilter.join(", ")
@@ -745,7 +765,7 @@ const ChallengePage: React.FC = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                  <DollarSign className="h-5 w-5 text-destructive" />
+                  <IndianRupee className="h-5 w-5 text-destructive" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Penalty</p>

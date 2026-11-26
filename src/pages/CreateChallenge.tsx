@@ -348,10 +348,15 @@ const CreateChallenge: React.FC = () => {
 export default CreateChallenge;
 
 function addDaysToDateString(date: string, days: number) {
-  const result = new Date(`${date}T12:00:00`);
-  result.setDate(result.getDate() + days);
-  const year = result.getFullYear();
-  const month = String(result.getMonth() + 1).padStart(2, "0");
-  const day = String(result.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  if (!date) return date;
+
+  const [year, month, day] = date.split("-").map(Number);
+  const result = new Date(Date.UTC(year, month - 1, day));
+  result.setUTCDate(result.getUTCDate() + days);
+
+  const nextYear = result.getUTCFullYear();
+  const nextMonth = String(result.getUTCMonth() + 1).padStart(2, "0");
+  const nextDay = String(result.getUTCDate()).padStart(2, "0");
+
+  return `${nextYear}-${nextMonth}-${nextDay}`;
 }

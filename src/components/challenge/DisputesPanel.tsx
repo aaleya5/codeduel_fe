@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, Check, Loader2, X } from "lucide-react";
 import {
   Dialog,
@@ -41,11 +41,7 @@ const DisputesPanel: React.FC<DisputesPanelProps> = ({
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [resolvingId, setResolvingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open) loadDisputes();
-  }, [open]);
-
-  const loadDisputes = async () => {
+  const loadDisputes = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await challengeApi.getDisputes(challengeId);
@@ -62,7 +58,13 @@ const DisputesPanel: React.FC<DisputesPanelProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [challengeId, toast]);
+
+  useEffect(() => {
+    if (open) {
+      loadDisputes();
+    }
+  }, [loadDisputes, open]);
 
   const handleResolve = async (penaltyId: string, action: "UPHOLD" | "WAIVE") => {
     setResolvingId(penaltyId);
@@ -86,10 +88,19 @@ const DisputesPanel: React.FC<DisputesPanelProps> = ({
       } else {
         throw new Error(response.message || "Failed to resolve dispute");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Please try again.";
+      const responseMessage =
+        typeof error === "object" && error !== null && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data
+              ?.message
+          : undefined;
       toast({
         title: "Failed to resolve dispute",
-        description: error.response?.data?.message || error.message || "Please try again.",
+        description: responseMessage || message || "Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -72,7 +72,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ entries, currentUse
                 {entry.missedDays > 0 ? (
                   <div className="flex items-center gap-1 text-destructive">
                     <TrendingDown className="h-4 w-4" />
-                    <span className="text-sm font-medium">${entry.penaltyAmount}</span>
+                    <span className="text-sm font-medium">₹{entry.penaltyAmount}</span>
                   </div>
                 ) : (
                   <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/20">
